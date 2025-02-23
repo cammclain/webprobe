@@ -5,11 +5,15 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "bbot>=2.3.2",
     "crawl4ai>=0.4.248",
     "playwright>=1.50.0",
     "pydantic>=2.10.6",
+    "python-dotenv>=1.0.1",
     "rich>=13.9.4",
+    "shellingham>=1.5.4",
     "sqlalchemy>=2.0.38",
+    "typer>=0.15.1",
     "uvloop>=0.21.0",
 ]
 
