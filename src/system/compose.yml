@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+  webprobe:
+    container_name: webprobe
+    build:
+      context: ./packages/webprobe
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"      # Adjust ports as needed
+    depends_on:
+      - postgres
+      - proxy
+      - seaweedfs
+    networks:
+      - webnet
+
+  postgres:
+    container_name: postgres
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_DB: webprobe_db
+      POSTGRES_USER: webprobe_user
+      POSTGRES_PASSWORD: securepassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - webnet
+
+  vpn-proxy:
+    container_name: vpn-proxy
+    image: qmcgaw/openvpn-client:latest
+    cap_add:
+      - NET_ADMIN
+    environment:
+      # Configure these variables according to your Mullvad account and VPN configuration
+      - OPENVPN_PROVIDER=MULLVAD
+      - OPENVPN_CONFIG=your-config-file
+      - OPENVPN_USERNAME=your-username
+      - OPENVPN_PASSWORD=your-password
+    ports:
+      - "3128:3128"  # Forward proxy port for routing traffic
+    networks:
+      - webnet
+  seaweedfs:
+    container_name: seaweedfs
+    image: chrislusf/seaweedfs:latest
+    command: "server -dir=/data -s3"
+    ports:
+      - "9333:9333"   # Master
+      - "8080:8080"   # Volume
+      - "8333:8333"   # S3 gateway
+    volumes:
+      - seaweedfs_data:/data
+    networks:
+      - webnet
+
+volumes:
+  postgres_data:
+  seaweedfs_data:
+
+networks:
+  webnet:
